@@ -1,0 +1,83 @@
+﻿@model TestCrollerApp.Models.CrawllerInfo
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="container">
+    <h2>Web Crawller- Fetch content from Web</h2>
+    <div class="panel-group">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">Search your content</div>
+            <div class="panel-body">
+                @using (Html.BeginForm("Index", "Home", FormMethod.Post))
+                {
+                    <table cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>Web Adress/URL: </td>
+                            <td>
+                                @Html.TextBoxFor(m => m.URL)
+                            </td>
+                            <td><input type="submit" value="Submit" /></td>
+                        </tr>
+                    </table>
+                }
+            </div>
+        </div>
+        @if (Model != null)
+        {
+            <div class="panel panel-success">
+                <div class="panel-heading">Crawlled Images ( Total Images: @Model.ImageList.Count )</div>
+                <div class="panel-body">
+                    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+
+                        <!-- Wrapper for slides -->
+                        <div class="carousel-inner">
+                            @{ var isFirst = true;}
+                            @foreach (var img in Model.ImageList)
+                            {
+                                if (isFirst)
+                                {
+                                    <div class="item active">
+                                        <img src="@img" alt="img" style="width:100%;max-height:350px;" />
+                                    </div>
+                                    { isFirst = false; }
+                                }
+                                else
+                                {
+                                    <div class="item">
+                                        <img src="@img" alt="img" style="width: 100%; max-height: 350px;" />
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Left and right controls -->
+                        <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-info">
+                <div class="panel-heading">Top 10 words with their occurnace</div>
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <tr><td>Word</td><td>Count</td></tr>
+                        @foreach (var tTen in Model.TopTenWords)
+                        {
+                            <tr><td>@tTen.Key</td><td>@tTen.Value</td></tr>
+                        }
+                    </table>
+                </div>
+            </div>
+
+        }
+    </div>
+</div>
