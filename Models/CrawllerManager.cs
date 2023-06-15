@@ -6,18 +6,23 @@ using System.Web;
 
 namespace TestCrollerApp.Models
 {
-    public class CrawllerManager
+    public class CrawllerManager : ICrawllerManager
     {
+        private readonly IWebCrawllerHelper _webCrawllerHelper;
+        public CrawllerManager(IWebCrawllerHelper webCrawllerHelper)
+        {
+            _webCrawllerHelper = webCrawllerHelper;
+        }
+
         public CrawllerInfo GetInfo(string url)
         {
-            CrawllerInfo objInfo = new CrawllerInfo();
-            WebCrawllerHelper objCrawller = new WebCrawllerHelper();            
-            string hmlCode = objCrawller.GetHTMLAsString(url);
-            objInfo.ImageList = objCrawller.GetAllImages(url,hmlCode);
-            string siteData = objCrawller.GetHTMLToText(hmlCode);
-            var ary = siteData.Split(new char[] { '.', '?', '!', ' ', ';', ':', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            var objInfo = new CrawllerInfo();                  
+            var hmlCode = _webCrawllerHelper.GetHTMLAsString(url);
+            objInfo.ImageList = _webCrawllerHelper.GetAllImages(url,hmlCode);
+            var siteData = _webCrawllerHelper.GetHTMLToText(hmlCode);
+            var ary = siteData.Split(Constants.splitterDelimeters, StringSplitOptions.RemoveEmptyEntries);
             objInfo.WordCount = ary.Length;
-            var reg = @"(?<!\S)[a-z-]+(?=[,.!?:;]?(?!\S))";
+            var reg = Constants.wordRegex;
 
             var dict = new Dictionary<string, int>();
 

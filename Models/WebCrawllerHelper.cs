@@ -7,7 +7,7 @@ using System.Web;
 
 namespace TestCrollerApp.Models
 {
-    public class WebCrawllerHelper
+    public class WebCrawllerHelper : IWebCrawllerHelper
     {
         public string GetHTMLAsString(string url)
         {
@@ -15,11 +15,11 @@ namespace TestCrollerApp.Models
             byte[] htmlData = wc.DownloadData(url);
             return System.Text.Encoding.UTF8.GetString(htmlData);
         }
-        public List<string> GetAllImages(string url, string HTMLCode)
+        public IEnumerable<string> GetAllImages(string url, string htmlCode)
         {
             List<string> ImageList = new List<string>();
             Uri objUri = new Uri(url);
-            foreach (Match m in Regex.Matches(HTMLCode, "<img.+?src=[\"'](.+?)[\"'].+?>", RegexOptions.IgnoreCase | RegexOptions.Multiline))
+            foreach (Match m in Regex.Matches(htmlCode, Constants.imgRegex, RegexOptions.IgnoreCase | RegexOptions.Multiline))
             {
                 var value = m.Groups[1].Value;
                 if (value.Contains("http"))
@@ -28,43 +28,43 @@ namespace TestCrollerApp.Models
                 }
                 else
                 {
-                    ImageList.Add(String.Concat(objUri.Scheme,"://",objUri.Authority,"/", value));
+                    ImageList.Add($"{objUri.Scheme}://{objUri.Authority}/{value}");
                 }
                 // add src to some array
             }
             return ImageList;
         }
 
-        public string GetHTMLToText(string HTMLCode)
+        public string GetHTMLToText(string htmlCode)
         {
             // Remove new lines since they are not visible in HTML
-            HTMLCode = HTMLCode.Replace("\n", " ");
+            htmlCode = htmlCode.Replace("\n", " ");
 
             // Remove tab spaces
-            HTMLCode = HTMLCode.Replace("\t", " ");
+            htmlCode = htmlCode.Replace("\t", " ");
 
             // Remove multiple white spaces from HTML
-            HTMLCode = Regex.Replace(HTMLCode, "\\s+", " ");
+            htmlCode = Regex.Replace(htmlCode, "\\s+", " ");
 
             // Remove HEAD tag
-            HTMLCode = Regex.Replace(HTMLCode, "<head.*?</head>", ""
+            htmlCode = Regex.Replace(htmlCode, "<head.*?</head>", ""
                                 , RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
             // Remove images tag
-            HTMLCode = Regex.Replace(HTMLCode, "<img.+?src=[\"'](.+?)[\"'].+?>", ""
+            htmlCode = Regex.Replace(htmlCode, "<img.+?src=[\"'](.+?)[\"'].+?>", ""
                                 , RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
             // Remove anchor tag
-            HTMLCode = Regex.Replace(HTMLCode, @"<a [^>]*?>(?<text>.*?)</a>", ""
+            htmlCode = Regex.Replace(htmlCode, @"<a [^>]*?>(?<text>.*?)</a>", ""
                                 , RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
             // Remove any JavaScript
-            HTMLCode = Regex.Replace(HTMLCode, "<script.*?</script>", ""
+            htmlCode = Regex.Replace(htmlCode, "<script.*?</script>", ""
               , RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-          
-            StringBuilder sbHTML = new StringBuilder(HTMLCode);
-           
+
+            StringBuilder sbHTML = new StringBuilder(htmlCode);
+
 
             // Finally, remove all HTML tags and return plain text
             return System.Text.RegularExpressions.Regex.Replace(

@@ -16,6 +16,11 @@ namespace TestCrollerApp.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly ICrawllerManager _crawllerManager;
+        public HomeController(ICrawllerManager crawllerManager)
+        {
+            _crawllerManager = crawllerManager;
+        }
 
         public ActionResult Index()
         {
@@ -26,29 +31,13 @@ namespace TestCrollerApp.Controllers
         public ActionResult Index(CrawllerInfo obj)
         {
             try
-            {
-                var crawller = new CrawllerManager();
-                return View(crawller.GetInfo(obj.URL));
+            {               
+                return View(_crawllerManager.GetInfo(obj.URL));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                throw ex;
             }
-        }
-
-        public ActionResult About()
-        {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
-        }
+        }       
     }
 }
